@@ -15,30 +15,36 @@ jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
+    env:
+      APP_SERVICE: php
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Install dependencies for Laravel Sail
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          extensions: dom, curl, libxml, mbstring, zip, fileinfo
+          ini-values: error_reporting=E_ALL
+          tools: composer:v2
+          coverage: none
+      - name: Install dependencies
         run: |
           cd api
-          docker run --rm \
-           -u "$(id -u):$(id -g)" \
-           -v "$(pwd):/var/www/html" \
-           -w /var/www/html \
-           laravelsail/php83-composer:latest \
-           composer install --ignore-platform-reqs
+          composer install --no-interaction
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
       - name: Build Docker images
         uses: docker/bake-action@v4
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          WWWGROUP: 1000
         with:
           pull: true
           load: true
           files: |
-            compose.yaml
-            compose.override.yaml
+            docker-compose.yml
+            docker-compose.override.yml
           set: |
             php.cache-from=type=gha,scope=php-${{github.ref}}
             php.cache-from=type=gha,scope=php-refs/heads/main
@@ -47,30 +53,32 @@ jobs:
             pwa.cache-from=type=gha,scope=pwa-refs/heads/main
             pwa.cache-to=type=gha,scope=pwa-${{github.ref}},mode=max
       - name: Start services
-        run: docker compose up --wait --no-build
-      - name: Check HTTP reachability
-        run: curl -v --fail-with-body http://localhost
+        working-directory: api
+        run: vendor/bin/sail up -d --wait; sleep 1
+      - name: Fix permission issue
+        working-directory: api
+        run: vendor/bin/sail exec php chown sail:sail -R .
       - name: Check API reachability
-        run: curl -vk --fail-with-body http://localhost/docs
+        run: "curl -v --fail-with-body -H 'Accept: application/json' http://localhost/up"
+      - name: Check Docs reachability
+        run: curl -vk --fail-with-body http://localhost/docs/api
       - name: Check PWA reachability
-        run: "curl -vk --fail-with-body -H 'Accept: text/html' http://localhost:3000"
+        run: curl -vk --fail-with-body http://localhost:3000
       - name: Run PHPStan
-        run: docker compose exec -T php vendor/bin/phpstan --memory-limit=2G --error-format=github
+        working-directory: api
+        run: vendor/bin/sail php vendor/bin/phpstan --memory-limit=2G --error-format=github
       - name: Run PHPUnit
-        run: docker compose exec -T php artisan test
+        working-directory: api
+        run: vendor/bin/sail artisan test
       - name: Run ESLint
-        run: docker compose exec -T pwa pnpm lint
-#      - name: Set secrets
-#        run: |
-#          docker compose exec -T php bin/console secrets:generate-keys
-#          echo -n "${{secrets.TMDB_API_KEY}}" | docker compose exec -T php bin/console secrets:set TMDB_API_KEY -
-      - name: Load fixtures
-        run: docker compose exec -T php "php artisan migrate && php artisan app:import-movies && php artisan db:seed"
-#      - name: Cache Playwright Binaries
-#        uses: actions/cache@v4
-#        with:
-#          path: ~/.cache/ms-playwright
-#          key: ${{ runner.os }}-playwright
+        working-directory: api
+        run: vendor/bin/sail exec pwa pnpm lint
+      - name: Migrate and seed database
+        working-directory: api
+        run: |
+          vendor/bin/sail artisan migrate
+          vendor/bin/sail artisan app:import-movies
+          vendor/bin/sail artisan db:seed
       - name: Install PNPM
         uses: pnpm/action-setup@v4
         with:

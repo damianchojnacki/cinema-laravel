@@ -119,13 +119,13 @@ The API must be accessible during frontend build, so we need to build and start 
 
 2. **Build:**
     ```bash
-    docker compose -f compose.yaml -f compose.prod.yaml up -d --build --wait php && \
-    docker compose -f compose.yaml -f compose.prod.yaml build pwa
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build --wait php && \
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml build pwa
     ```
 
 3. **Start:**
     ```bash
-    docker compose -f compose.yaml -f compose.prod.yaml up -d --wait
+    docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --wait
     ```
 
 ### Note for deploying on Coolify

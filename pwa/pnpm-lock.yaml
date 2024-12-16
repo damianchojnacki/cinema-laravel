@@ -14,12 +14,6 @@ importers:
       '@fontsource/poppins':
         specifier: ^5.1.0
         version: 5.1.0
-      '@radix-ui/react-label':
-        specifier: ^2.1.0
-        version: 2.1.1(@types/react-dom@18.3.5(@types/react@18.3.16))(@types/react@18.3.16)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
-      '@radix-ui/react-slot':
-        specifier: ^1.1.0
-        version: 1.1.1(@types/react@18.3.16)(react@18.3.1)
       '@tailwindcss/forms':
         specifier: ^0.5.9
         version: 0.5.9(tailwindcss@3.4.16)
@@ -29,12 +23,6 @@ importers:
       axios:
         specifier: ^1.7.9
         version: 1.7.9
-      class-variance-authority:
-        specifier: ^0.7.1
-        version: 0.7.1
-      lucide-react:
-        specifier: ^0.462.0
-        version: 0.462.0(react@18.3.1)
       next:
         specifier: ^14.2.18
         version: 14.2.20(@babel/core@7.26.0)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -66,9 +54,6 @@ importers:
       '@stylistic/eslint-plugin':
         specifier: ^2.11.0
         version: 2.12.1(eslint@9.17.0(jiti@1.21.6))(typescript@5.7.2)
-      '@types/lodash':
-        specifier: ^4.17.13
-        version: 4.17.13
       '@types/node':
         specifier: ^20.17.9
         version: 20.17.10
@@ -430,9 +415,6 @@ packages:
 
   '@types/json5@0.0.29':
     resolution: {integrity: sha512-dRLjCWHYg4oaA77cxO64oO+7JwCwnIzkZPdrrC71jQmQtlhM556pwKo5bUzqvZndkVbeFLIIi+9TC40JNF5hNQ==}
-
-  '@types/lodash@4.17.13':
-    resolution: {integrity: sha512-lfx+dftrEZcdBPczf9d0Qv0x+j/rfNCMuC6OcfXmO8gkfeNAY88PgKUbvG56whcN23gc27yenwF6oJZXGFpYxg==}
 
   '@types/node@20.17.10':
     resolution: {integrity: sha512-/jrvh5h6NXhEauFFexRin69nA0uHJ5gwk4iDivp/DeoEua3uwCUto6PC86IpRITBOs4+6i2I56K5x5b6WYGXHA==}
@@ -1318,11 +1300,6 @@ packages:
 
   lru-cache@5.1.1:
     resolution: {integrity: sha512-KpNARQA3Iwv+jTA0utUVVbrh+Jlrr1Fv0e56GGzAFOXN7dk/FviaDW8LHmK52DlcH4WP2n6gI8vN1aesBFgo9w==}
-
-  lucide-react@0.462.0:
-    resolution: {integrity: sha512-NTL7EbAao9IFtuSivSZgrAh4fZd09Lr+6MTkqIxuHaH2nnYiYIzXPo06cOxHg9wKLdj6LL8TByG4qpePqwgx/g==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0-rc
 
   math-intrinsics@1.0.0:
     resolution: {integrity: sha512-4MqMiKP90ybymYvsut0CH2g4XWbfLtmlCkXmtmdcDCxNB+mQcu1w/1+L/VD7vi/PSv7X2JYV7SCcR+jiPXnQtA==}
@@ -2243,8 +2220,6 @@ snapshots:
   '@types/json-schema@7.0.15': {}
 
   '@types/json5@0.0.29': {}
-
-  '@types/lodash@4.17.13': {}
 
   '@types/node@20.17.10':
     dependencies:
@@ -3318,10 +3293,6 @@ snapshots:
   lru-cache@5.1.1:
     dependencies:
       yallist: 3.1.1
-
-  lucide-react@0.462.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   math-intrinsics@1.0.0: {}
 
