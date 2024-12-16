@@ -58,6 +58,9 @@ jobs:
       - name: Fix permission issue
         working-directory: api
         run: vendor/bin/sail exec php chown sail:sail -R .
+      - name: Create .env
+        working-directory: api
+        run: vendor/bin/sail exec php touch .env
       - name: Generate app key
         working-directory: api
         run: vendor/bin/sail php artisan key:generate
