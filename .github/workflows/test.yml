@@ -38,6 +38,8 @@ jobs:
         uses: docker/bake-action@v4
         env:
           TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+          APP_ENV: 'local'
+          APP_DEBUG: 'true'
           WWWGROUP: 1000
         with:
           pull: true
