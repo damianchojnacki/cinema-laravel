@@ -55,18 +55,15 @@ jobs:
       - name: Start services
         working-directory: api
         run: vendor/bin/sail up -d --wait; sleep 1
-      - name: Create .env
+      - name: Setup app
         working-directory: api
-        run: vendor/bin/sail exec php echo "APP_KEY=" > .env
-      - name: Create database
-        working-directory: api
-        run: vendor/bin/sail exec php touch database/database.sqlite
-      - name: Fix permission issue
-        working-directory: api
-        run: vendor/bin/sail exec php chown sail:sail -R .
-      - name: Generate app key
-        working-directory: api
-        run: vendor/bin/sail php artisan key:generate
+        run: |
+          vendor/bin/sail exec php \
+          echo "APP_KEY=" > .env; \
+          touch database/database.sqlite; \
+          chown sail:sail -R . ;\
+          php artisan key:generate ;\
+          php artisan migrate
       - name: Check API reachability
         run: "curl -v --fail-with-body -H 'Accept: application/json' http://localhost/up"
       - name: Check Docs reachability
@@ -85,7 +82,6 @@ jobs:
       - name: Migrate and seed database
         working-directory: api
         run: |
-          vendor/bin/sail artisan migrate
           vendor/bin/sail artisan app:import-movies
           vendor/bin/sail artisan db:seed
       - name: Install PNPM
