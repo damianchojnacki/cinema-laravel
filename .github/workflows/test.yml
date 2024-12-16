@@ -63,7 +63,6 @@ jobs:
             touch database/database.sqlite && \
             chown sail:sail -R . && \
             php artisan key:generate && \
-            php artisan ide-helper:generate && \
             php artisan migrate'
       - name: Check API reachability
         run: "curl -v --fail-with-body -H 'Accept: application/json' http://localhost/up"
