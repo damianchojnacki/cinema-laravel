@@ -58,6 +58,9 @@ jobs:
       - name: Create .env
         working-directory: api
         run: vendor/bin/sail exec php echo "APP_KEY=" > .env
+      - name: Create database
+        working-directory: api
+        run: vendor/bin/sail exec php touch database/database.sqlite
       - name: Fix permission issue
         working-directory: api
         run: vendor/bin/sail exec php chown sail:sail -R .
