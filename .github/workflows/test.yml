@@ -58,6 +58,9 @@ jobs:
       - name: Fix permission issue
         working-directory: api
         run: vendor/bin/sail exec php chown sail:sail -R .
+      - name: Generate app key
+        working-directory: api
+        run: vendor/bin/sail php artisan key:generate
       - name: Check API reachability
         run: "curl -v --fail-with-body -H 'Accept: application/json' http://localhost/up"
       - name: Check Docs reachability
