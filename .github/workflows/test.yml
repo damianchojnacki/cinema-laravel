@@ -37,7 +37,6 @@ jobs:
       - name: Build Docker images
         uses: docker/bake-action@v4
         env:
-          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
           WWWGROUP: 1000
         with:
           pull: true
@@ -59,7 +58,8 @@ jobs:
         working-directory: api
         run: |
           vendor/bin/sail exec php sh -c '\
-            echo "APP_KEY=" > .env && \
+            echo "APP_KEY=" >> .env && \
+            echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env && \
             touch database/database.sqlite && \
             chown sail:sail -R . && \
             php artisan key:generate && \
