@@ -58,12 +58,12 @@ jobs:
       - name: Setup app
         working-directory: api
         run: |
-          vendor/bin/sail exec php \
-          echo "APP_KEY=" > .env; \
-          touch database/database.sqlite; \
-          chown sail:sail -R . ;\
-          php artisan key:generate ;\
-          php artisan migrate
+          vendor/bin/sail exec php "\
+            echo "APP_KEY=" > .env; \
+            touch database/database.sqlite; \
+            chown sail:sail -R . ;\
+            php artisan key:generate ;\
+            php artisan migrate"
       - name: Check API reachability
         run: "curl -v --fail-with-body -H 'Accept: application/json' http://localhost/up"
       - name: Check Docs reachability
