@@ -1,0 +1,32 @@
+{
+	{$CADDY_GLOBAL_OPTIONS}
+
+	frankenphp {
+		{$FRANKENPHP_CONFIG}
+	}
+}
+
+{$CADDY_EXTRA_CONFIG}
+
+{$SERVER_NAME:localhost} {
+	root * /app/public
+	encode zstd br gzip
+
+	# Matches requests for HTML documents, for static files and for Next.js files,
+	# except for known API paths and paths with extensions handled by API Platform
+	@pwa expression `(
+			header({'Accept': '*text/html*'})
+			&& !path(
+				'/docs*', '/telescope*', '/storage*', '/api*',
+				'*.json*', '*.html', '*.csv', '*.yml', '*.yaml', '*.xml'
+			)
+		)
+		|| path('/favicon*', '/apple-touch-icon.png', '/web-app-manifest*', '/manifest.json', '/robots.txt', '/sitemap*', '/_next*', '/__next*')
+		|| query({'_rsc': '*'})`
+
+	# Comment the following line if you don't want Next.js to catch requests for HTML documents.
+	# In this case, they will be handled by the PHP app.
+	reverse_proxy @pwa http://{$PWA_UPSTREAM}
+
+	php_server
+}

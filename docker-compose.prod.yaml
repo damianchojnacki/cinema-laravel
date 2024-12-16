@@ -1,0 +1,40 @@
+# Production environment override
+services:
+    php:
+        ports:
+            - 80:80
+        build:
+            context: ./api
+            target: frankenphp_prod
+        environment:
+            PWA_UPSTREAM: 'pwa:3000'
+            SERVER_NAME: '${SERVER_NAME}'
+            APP_KEY: '${APP_KEY}'
+            APP_ENV: 'prod'
+            APP_DEBUG: false
+            APP_URL: '${APP_URL}'
+            FRONTEND_URL: '${APP_URL}'
+            LOG_STACK: 'single,stdout,stderr'
+            LOG_LEVEL: 'info'
+            DB_CONNECTION: '${DB_CONNECTION:-sqlite}'
+            DB_DATABASE: '${DB_DATABASE:-/app/storage/database.sqlite}'
+            TMDB_API_KEY: '${TMDB_API_KEY}'
+            QUEUE_CONNECTION: '${QUEUE_CONNECTION:-sync}'
+        volumes:
+            - caddy_data:/data
+            - caddy_config:/config
+            - storage:/app/storage
+
+    pwa:
+        build:
+            context: ./pwa
+            target: prod
+            network: host
+            args:
+                - NEXT_PUBLIC_ENTRYPOINT=${APP_URL}
+                - NEXT_ENTRYPOINT=${APP_URL}
+
+volumes:
+    caddy_data:
+    caddy_config:
+    storage:

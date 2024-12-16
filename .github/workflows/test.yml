@@ -1,0 +1,104 @@
+name: Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request: ~
+  workflow_dispatch: ~
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+  cancel-in-progress: true
+
+jobs:
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Install dependencies for Laravel Sail
+        run: |
+          cd api
+          docker run --rm \
+           -u "$(id -u):$(id -g)" \
+           -v "$(pwd):/var/www/html" \
+           -w /var/www/html \
+           laravelsail/php83-composer:latest \
+           composer install --ignore-platform-reqs
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Docker images
+        uses: docker/bake-action@v4
+        env:
+          TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
+        with:
+          pull: true
+          load: true
+          files: |
+            compose.yaml
+            compose.override.yaml
+          set: |
+            php.cache-from=type=gha,scope=php-${{github.ref}}
+            php.cache-from=type=gha,scope=php-refs/heads/main
+            php.cache-to=type=gha,scope=php-${{github.ref}},mode=max
+            pwa.cache-from=type=gha,scope=pwa-${{github.ref}}
+            pwa.cache-from=type=gha,scope=pwa-refs/heads/main
+            pwa.cache-to=type=gha,scope=pwa-${{github.ref}},mode=max
+      - name: Start services
+        run: docker compose up --wait --no-build
+      - name: Check HTTP reachability
+        run: curl -v --fail-with-body http://localhost
+      - name: Check API reachability
+        run: curl -vk --fail-with-body http://localhost/docs
+      - name: Check PWA reachability
+        run: "curl -vk --fail-with-body -H 'Accept: text/html' http://localhost:3000"
+      - name: Run PHPStan
+        run: docker compose exec -T php vendor/bin/phpstan --memory-limit=2G --error-format=github
+      - name: Run PHPUnit
+        run: docker compose exec -T php artisan test
+      - name: Run ESLint
+        run: docker compose exec -T pwa pnpm lint
+#      - name: Set secrets
+#        run: |
+#          docker compose exec -T php bin/console secrets:generate-keys
+#          echo -n "${{secrets.TMDB_API_KEY}}" | docker compose exec -T php bin/console secrets:set TMDB_API_KEY -
+      - name: Load fixtures
+        run: docker compose exec -T php "php artisan migrate && php artisan app:import-movies && php artisan db:seed"
+#      - name: Cache Playwright Binaries
+#        uses: actions/cache@v4
+#        with:
+#          path: ~/.cache/ms-playwright
+#          key: ${{ runner.os }}-playwright
+      - name: Install PNPM
+        uses: pnpm/action-setup@v4
+        with:
+          version: latest
+      - name: Cache PNPM
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.PNPM_HOME }}
+          key: ${{ runner.os }}-pnpm-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-
+      - name: Install Dependencies
+        working-directory: e2e
+        run: pnpm install
+      - name: Install Playwright Browsers with Deps
+        working-directory: e2e
+        run: pnpm exec playwright install --with-deps
+      - name: Run Playwright
+        working-directory: e2e
+        timeout-minutes: 5
+        run: pnpm exec playwright test --workers=1
+      - name: Debug Services
+        if: failure()
+        run: |
+          docker compose ps
+          docker compose logs
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-screenshots
+          path: pwa/test-results

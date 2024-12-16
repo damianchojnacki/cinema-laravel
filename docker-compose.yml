@@ -1,0 +1,16 @@
+services:
+    php:
+        networks:
+            - sail
+
+    pwa:
+        image: ${IMAGES_PREFIX:-}app-pwa
+        networks:
+            - sail
+        environment:
+            NEXT_ENTRYPOINT: http://php
+            NEXT_PUBLIC_ENTRYPOINT: '${APP_URL}'
+
+networks:
+    sail:
+        driver: bridge
