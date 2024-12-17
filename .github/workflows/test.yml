@@ -61,7 +61,7 @@ jobs:
         run: php artisan test
       - name: Run Laravel Server
         working-directory: api
-        run: php artisan serve --no-reload --host localhost:8000 &
+        run: php artisan serve --no-reload --host localhost &
       - name: Check API reachability
         run: curl --fail-with-body http://127.0.0.1:8000/up
       - name: Check Docs reachability
