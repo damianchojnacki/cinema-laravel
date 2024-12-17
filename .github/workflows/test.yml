@@ -62,7 +62,7 @@ jobs:
         working-directory: api
         run: php artisan serve --no-reload &
       - name: Check API reachability
-        run: "curl --fail-with-body http://127.0.0.1:8000/up"
+        run: sleep 1 && curl --fail-with-body http://127.0.0.1:8000/up
       - name: Check Docs reachability
         run: curl -vk --fail-with-body http://127.0.0.1:8000/docs/api.json
       - name: Install PNPM
