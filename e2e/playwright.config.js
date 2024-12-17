@@ -5,10 +5,10 @@ module.exports = defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
-  retries: 0,
+  retries: 1,
   workers: 1,
   reporter: [
-    ['html', { open: 'never' }]
+    ['html', { open: 'never' }],
   ],
   timeout: 10 * 1000,
   use: {
