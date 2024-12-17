@@ -80,11 +80,11 @@ jobs:
       - name: Run ESLint
         working-directory: pwa
         run: pnpm lint
-      - name: Run Laravel Server
+      - name: Run Next.js Server
         working-directory: pwa
-        run: pnpm dev > /dev/null 2>&1 &
+        run: pnpm dev &
       - name: Check PWA reachability
-        run: curl -vk --fail-with-body http://localhost:3000
+        run: curl -vk --fail-with-body http://127.0.0.1:3000
       - name: Migrate and seed database
         working-directory: api
         run: |
