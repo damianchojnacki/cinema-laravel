@@ -61,7 +61,7 @@ jobs:
         run: php artisan test
       - name: Run Laravel Server
         working-directory: api
-        run: php artisan serve --no-reload
+        run: php artisan serve --no-reload --host 127.0.0.1:8000 &
       - name: Check API reachability
         run: curl --fail-with-body http://127.0.0.1:8000/up
       - name: Check Docs reachability
@@ -108,11 +108,9 @@ jobs:
         working-directory: e2e
         timeout-minutes: 5
         run: pnpm exec playwright test --workers=1
-      - uses: actions/upload-artifact@v4
+      - name: Show Laravel logs
         if: failure()
-        with:
-          name: laravel-logs
-          path: api/storage/logs/laravel.log
+        run: cat api/storage/logs/laravel.log
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
