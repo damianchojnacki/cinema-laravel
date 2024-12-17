@@ -109,4 +109,4 @@ jobs:
         if: failure()
         with:
           name: playwright-screenshots
-          path: pwa/test-results
+          path: e2e/test-results
