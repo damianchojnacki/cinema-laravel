@@ -107,7 +107,7 @@ jobs:
         timeout-minutes: 5
         run: pnpm exec playwright test --workers=1
       - name: Kill servers
-        continue-on-error: true
+        if: always()
         run: |
           kill $(lsof -t -i:8000)
           kill $(lsof -t -i:3000)
