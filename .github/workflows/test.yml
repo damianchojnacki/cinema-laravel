@@ -20,8 +20,8 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-      NEXT_PUBLIC_ENTRYPOINT: http://127.0.0.1:8000
-      NEXT_ENTRYPOINT: http://127.0.0.1:8000
+      NEXT_PUBLIC_ENTRYPOINT: http://localhost:8000
+      NEXT_ENTRYPOINT: http://localhost:8000
       TELESCOPE_ENABLED: false
     steps:
       - name: Checkout
@@ -63,9 +63,9 @@ jobs:
         working-directory: api
         run: php artisan serve --no-reload --host localhost &
       - name: Check API reachability
-        run: curl --fail-with-body http://127.0.0.1:8000/up
+        run: curl --fail-with-body http://localhost:8000/up
       - name: Check Docs reachability
-        run: curl -vk --fail-with-body http://127.0.0.1:8000/docs/api.json
+        run: curl -vk --fail-with-body http://localhost:8000/docs/api.json
       - name: Install PNPM
         uses: pnpm/action-setup@v4
         with:
@@ -92,7 +92,7 @@ jobs:
         working-directory: pwa
         run: pnpm dev &
       - name: Check PWA reachability
-        run: curl -vk --fail-with-body http://127.0.0.1:3000/movies
+        run: curl -vk --fail-with-body http://localhost:3000/movies
       - name: Install Dependencies
         working-directory: e2e
         run: pnpm install
