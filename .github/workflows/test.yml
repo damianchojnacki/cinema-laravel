@@ -90,7 +90,7 @@ jobs:
           php artisan db:seed
       - name: Run Next.js Server
         working-directory: pwa
-        run: pnpm dev &
+        run: NEXT_PUBLIC_ENTRYPOINT=$NEXT_PUBLIC_ENTRYPOINT NEXT_ENTRYPOINT=$NEXT_ENTRYPOINT pnpm dev &
       - name: Check PWA reachability
         run: curl -vk --fail-with-body http://localhost:3000/movies
       - name: Install Dependencies
