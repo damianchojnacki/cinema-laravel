@@ -61,9 +61,9 @@ jobs:
         run: php artisan test
       - name: Run Laravel Server
         working-directory: api
-        run: php artisan serve --no-reload --host localhost &
+        run: php artisan serve --no-reload --host localhost --port 8888 &
       - name: Check API reachability
-        run: curl --fail-with-body http://localhost:8000/up
+        run: curl --fail-with-body http://localhost:8888/up
       - name: Check Docs reachability
         run: curl -vk --fail-with-body http://localhost:8000/docs/api.json
       - name: Install PNPM
