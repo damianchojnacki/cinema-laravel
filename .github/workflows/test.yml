@@ -80,16 +80,16 @@ jobs:
       - name: Run ESLint
         working-directory: pwa
         run: pnpm lint
-      - name: Run Next.js Server
-        working-directory: pwa
-        run: pnpm dev &
-      - name: Check PWA reachability
-        run: curl -vk --fail-with-body http://127.0.0.1:3000
       - name: Migrate and seed database
         working-directory: api
         run: |
           php artisan app:import-movies
           php artisan db:seed
+      - name: Run Next.js Server
+        working-directory: pwa
+        run: pnpm dev &
+      - name: Check PWA reachability
+        run: curl -vk --fail-with-body http://127.0.0.1:3000
       - name: Install Dependencies
         working-directory: e2e
         run: pnpm install
