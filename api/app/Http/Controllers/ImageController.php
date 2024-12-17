@@ -20,8 +20,6 @@ class ImageController extends Controller
             'response' => new SymfonyResponseFactory($request),
         ]);
 
-        Log::info('Trying to get image' . $path);
-
         try {
             return $server->getImageResponse($path, $request->except(['expires', 'signature']));
         } catch (FileNotFoundException $e) {
