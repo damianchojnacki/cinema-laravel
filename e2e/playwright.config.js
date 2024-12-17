@@ -1,14 +1,14 @@
 // @ts-check
 const { defineConfig, devices } = require('@playwright/test');
 
+const reporter = ['html', { open: 'never' }]
+
 module.exports = defineConfig({
   testDir: './tests',
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
   retries: 1,
-  reporter: [
-    ['html', { open: 'never' }],
-  ],
+  reporter: process.env.CI ? [['github'], reporter] : [reporter],
   timeout: 10 * 1000,
   use: {
     ignoreHTTPSErrors: true,

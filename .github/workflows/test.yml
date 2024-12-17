@@ -20,8 +20,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
-      NEXT_PUBLIC_ENTRYPOINT: http://localhost:8888
-      NEXT_ENTRYPOINT: http://localhost:8888
       TELESCOPE_ENABLED: false
     steps:
       - name: Checkout
@@ -90,7 +88,7 @@ jobs:
           php artisan db:seed
       - name: Run Next.js Server
         working-directory: pwa
-        run: NEXT_PUBLIC_ENTRYPOINT=$NEXT_PUBLIC_ENTRYPOINT NEXT_ENTRYPOINT=$NEXT_ENTRYPOINT pnpm dev &
+        run: NEXT_PUBLIC_ENTRYPOINT='http://localhost:8888' NEXT_ENTRYPOINT='http://localhost:8888' pnpm dev &
       - name: Check PWA reachability
         run: curl -vk --fail-with-body http://localhost:3000/movies
       - name: Install Dependencies
