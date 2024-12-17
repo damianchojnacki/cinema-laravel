@@ -11,12 +11,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   tests:
     name: Tests
     runs-on: ubuntu-latest
     env:
-      APP_SERVICE: php
+      TMDB_API_KEY: ${{ secrets.TMDB_API_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,66 +27,42 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.3'
-          extensions: dom, curl, libxml, mbstring, zip, fileinfo
+          extensions: dom, curl, libxml, mbstring, zip, pcntl, pdo, sqlite, pdo_sqlite
           ini-values: error_reporting=E_ALL
-          tools: composer:v2
           coverage: none
-      - name: Install dependencies
-        run: |
-          cd api
-          composer install --no-interaction
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-      - name: Build Docker images
-        uses: docker/bake-action@v4
-        env:
-          WWWGROUP: 1000
-        with:
-          pull: true
-          load: true
-          files: |
-            docker-compose.yml
-            docker-compose.override.yml
-          set: |
-            php.cache-from=type=gha,scope=php-${{github.ref}}
-            php.cache-from=type=gha,scope=php-refs/heads/main
-            php.cache-to=type=gha,scope=php-${{github.ref}},mode=max
-            pwa.cache-from=type=gha,scope=pwa-${{github.ref}}
-            pwa.cache-from=type=gha,scope=pwa-refs/heads/main
-            pwa.cache-to=type=gha,scope=pwa-${{github.ref}},mode=max
-      - name: Start services
+      - name: Get composer cache directory
+        id: composer-cache
         working-directory: api
-        run: vendor/bin/sail up -d --wait; sleep 1
+        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+      - name: Cache dependencies
+        uses: actions/cache@v4
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+          restore-keys: ${{ runner.os }}-composer-
+      - name: Install dependencies
+        working-directory: api
+        run: composer install --prefer-dist --no-interaction --no-progress
       - name: Setup app
         working-directory: api
         run: |
-          vendor/bin/sail exec php sh -c '\
-            echo "APP_KEY=" >> .env && \
-            echo "TMDB_API_KEY=${{ secrets.TMDB_API_KEY }}" >> .env && \
-            touch database/database.sqlite && \
-            chown sail:sail -R . && \
-            php artisan key:generate && \
-            php artisan migrate'
-      - name: Check API reachability
-        run: "curl -v --fail-with-body -H 'Accept: application/json' http://localhost/up"
-      - name: Check Docs reachability
-        run: curl -vk --fail-with-body http://localhost/docs/api
-      - name: Check PWA reachability
-        run: curl -vk --fail-with-body http://localhost:3000
+          cp .env.example .env
+          touch database/database.sqlite
+          php artisan key:generate
+          php artisan migrate
       - name: Run PHPStan
         working-directory: api
-        run: vendor/bin/sail php vendor/bin/phpstan --memory-limit=2G --error-format=github
+        run: vendor/bin/phpstan --memory-limit=2G --error-format=github
       - name: Run PHPUnit
         working-directory: api
-        run: vendor/bin/sail artisan test
-      - name: Run ESLint
+        run: php artisan test
+      - name: Run Laravel Server
         working-directory: api
-        run: vendor/bin/sail exec pwa pnpm lint
-      - name: Migrate and seed database
-        working-directory: api
-        run: |
-          vendor/bin/sail artisan app:import-movies
-          vendor/bin/sail artisan db:seed
+        run: php artisan serve --no-reload &
+      - name: Check API reachability
+        run: "curl --fail-with-body http://127.0.0.1:8000/up"
+      - name: Check Docs reachability
+        run: curl -vk --fail-with-body http://127.0.0.1:8000/docs/api.json
       - name: Install PNPM
         uses: pnpm/action-setup@v4
         with:
@@ -96,6 +75,22 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pnpm-
       - name: Install Dependencies
+        working-directory: pwa
+        run: pnpm install
+      - name: Run ESLint
+        working-directory: pwa
+        run: pnpm lint
+      - name: Run Laravel Server
+        working-directory: pwa
+        run: pnpm dev > /dev/null 2>&1 &
+      - name: Check PWA reachability
+        run: curl -vk --fail-with-body http://localhost:3000
+      - name: Migrate and seed database
+        working-directory: api
+        run: |
+          php artisan app:import-movies
+          php artisan db:seed
+      - name: Install Dependencies
         working-directory: e2e
         run: pnpm install
       - name: Install Playwright Browsers with Deps
@@ -105,11 +100,11 @@ jobs:
         working-directory: e2e
         timeout-minutes: 5
         run: pnpm exec playwright test --workers=1
-      - name: Debug Services
+      - uses: actions/upload-artifact@v4
         if: failure()
-        run: |
-          docker compose ps
-          docker compose logs
+        with:
+          name: laravel-logs
+          path: api/storage/logs/laravel.log
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
