@@ -57,12 +57,9 @@ jobs:
       - name: Run PHPUnit
         working-directory: api
         run: php artisan test
-      - name: Kill Existing Server
-        run: |
-          lsof -i :8000 | awk 'NR>1 {print $2}' | xargs -r kill -9 || true
       - name: Run Laravel Server
         working-directory: api
-        run: nohup php artisan serve --no-reload --port 8000 > storage/logs/server.log 2>&1 &
+        run: php -S localhost:8000 -t public > storage/logs/server.log 2>&1 &
       - name: Wait for Server to Start
         run: sleep 2
       - name: Check API reachability
@@ -114,7 +111,7 @@ jobs:
       - name: Show Laravel logs
         if: failure()
         run: cat api/storage/logs/laravel.log
-      - name: Show Laravel logs
+      - name: Show Server logs
         if: failure()
         run: cat api/storage/logs/server.log
       - uses: actions/upload-artifact@v4
