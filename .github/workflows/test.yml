@@ -57,7 +57,7 @@ jobs:
       - name: Run PHPUnit
         working-directory: api
         run: php artisan test
-      - name: Run Laravel Server
+      - name: Run PHP Server
         working-directory: api
         run: php -S localhost:8000 -t public > storage/logs/server.log 2>&1 &
       - name: Wait for Server to Start
@@ -65,7 +65,7 @@ jobs:
       - name: Check API reachability
         run: curl --fail-with-body http://localhost:8000/up
       - name: Check Docs reachability
-        run: curl -vk --fail-with-body http://localhost:8000/docs/api.json
+        run: curl --fail-with-body http://localhost:8000/docs/api
       - name: Install PNPM
         uses: pnpm/action-setup@v4
         with:
