@@ -57,9 +57,14 @@ jobs:
       - name: Run PHPUnit
         working-directory: api
         run: php artisan test
+      - name: Kill Existing Server
+        run: |
+          lsof -i :8000 | awk 'NR>1 {print $2}' | xargs -r kill -9 || true
       - name: Run Laravel Server
         working-directory: api
-        run: php artisan serve --no-reload &
+        run: nohup php artisan serve --no-reload --port 8000 > storage/logs/server.log 2>&1 &
+      - name: Wait for Server to Start
+        run: sleep 2
       - name: Check API reachability
         run: curl --fail-with-body http://localhost:8000/up
       - name: Check Docs reachability
@@ -106,14 +111,12 @@ jobs:
         working-directory: e2e
         timeout-minutes: 5
         run: pnpm exec playwright test --workers=1
-      - name: Kill servers
-        if: always()
-        run: |
-          kill $(lsof -t -i:8000)
-          kill $(lsof -t -i:3000)
       - name: Show Laravel logs
         if: failure()
         run: cat api/storage/logs/laravel.log
+      - name: Show Laravel logs
+        if: failure()
+        run: cat api/storage/logs/server.log
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
