@@ -1,8 +1,6 @@
 # Production environment override
 services:
     php:
-        ports:
-            - 80:80
         build:
             context: ./api
             target: frankenphp_prod
