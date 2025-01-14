@@ -18,8 +18,18 @@ services:
             DB_DATABASE: '${DB_DATABASE:-/app/storage/database.sqlite}'
             TMDB_API_KEY: '${TMDB_API_KEY}'
             QUEUE_CONNECTION: '${QUEUE_CONNECTION:-sync}'
+        volumes:
+          - caddy_data:/data
+          - caddy_config:/config
+          - storage:/app/storage
 
     pwa:
+        image: ${IMAGES_PREFIX:-}app-pwa
+        networks:
+          - sail
+        environment:
+          NEXT_ENTRYPOINT: http://php
+          NEXT_PUBLIC_ENTRYPOINT: '${APP_URL}'
         build:
             context: ./pwa
             target: prod
