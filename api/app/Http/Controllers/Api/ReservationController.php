@@ -39,6 +39,9 @@ class ReservationController extends Controller
         );
     }
 
+    /**
+     * Get the specified resource
+     */
     public function show(Reservation $reservation): ReservationResource
     {
         $reservation->load('showing.movie');
@@ -46,6 +49,9 @@ class ReservationController extends Controller
         return new ReservationResource($reservation);
     }
 
+    /**
+     * Get the qr code for reservation
+     */
     public function qr(Reservation $reservation): Response
     {
         $url = URL::frontend()->reservation($reservation);

@@ -13,7 +13,7 @@ class MovieController extends Controller
     public static int $perPage = 12;
 
     /**
-     * Display a listing of the resource.
+     * Get a listing of the resource.
      *
      * @response AnonymousResourceCollection<LengthAwarePaginator<MovieResource>>
      */
@@ -25,7 +25,7 @@ class MovieController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get the specified resource.
      */
     public function show(Movie $movie): MovieResource
     {

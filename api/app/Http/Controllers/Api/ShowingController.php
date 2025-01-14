@@ -11,7 +11,7 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class ShowingController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Get a listing of the resource.
      */
     public function index(Movie $movie): AnonymousResourceCollection
     {
@@ -19,7 +19,7 @@ class ShowingController extends Controller
     }
 
     /**
-     * Display the specified resource.
+     * Get the specified resource.
      */
     public function show(Movie $movie, Showing $showing): ShowingResource
     {
